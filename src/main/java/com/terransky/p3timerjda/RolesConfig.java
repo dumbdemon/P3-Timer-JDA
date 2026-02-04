@@ -207,6 +207,9 @@ public class RolesConfig {
                     role.setTimeout(false);
                     rolesDatum.getRoles().add(role);
                     rolesModified++;
+                } else {
+                    long elapsedTime = now.toEpochSecond(ZoneOffset.of("+0")) - startTime.toEpochSecond(ZoneOffset.of("+0"));
+                    new Timer().schedule(new TimeoutTask(guild.getRoleById(role.getRoleID()), serverID), TimeUnit.SECONDS.toMillis(role.getTimeout() - elapsedTime));
                 }
             }
             Thread.sleep(200);

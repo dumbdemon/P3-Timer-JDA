@@ -4,8 +4,12 @@ plugins {
     id 'com.gradleup.shadow' version '9.3.1'
 }
 
+application {
+    mainClass = 'com.terransky.p3timerjda.P3TimerJDA'
+}
+
 group = 'com.terransky.p3timerjda'
-version = '0.1.0'
+version = '0.1.1'
 
 shadowJar {
     archiveBaseName = 'p3timerjda'
