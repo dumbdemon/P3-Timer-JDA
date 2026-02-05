@@ -17,7 +17,6 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
@@ -57,11 +56,11 @@ public class AddRole extends SlashCommandInteraction {
             default -> timeout = TimeUnit.HOURS.toSeconds(baseTimeout);
         }
 
-        if (!Objects.requireNonNull(blob.getGuild().getBotRole()).canInteract(watchedRole)) {
+        if (blob.getGuild().getBotRole() == null || blob.getGuild().getBotRole().canInteract(watchedRole)) {
             event.replyComponents(StandardResponse.getResponseContainer(P3TimerJDA.NAME,
                 String.format("Unable to interact with %s. Please put my role [%s] higher than all of the roles to be watched.",
                     watchedRole.getAsMention(),
-                    blob.getGuild().getBotRole().getAsMention()
+                    blob.getGuild().getBotRole() == null ? "N/A" : blob.getGuild().getBotRole().getAsMention()
                 ), BotColors.ERROR)
             ).queue();
             return null;
