@@ -17,21 +17,22 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
 public class AddRole extends SlashCommandInteraction {
 
-    public static final OptionData[] ROLE_OPTIONS = {
+    public static final List<OptionData> ROLE_OPTIONS = List.of(
         new OptionData(OptionType.ROLE, "role", "The role to watch", true),
         new OptionData(OptionType.INTEGER, "timeout", "how long to timeout the role when mentioned.", false),
         new OptionData(OptionType.STRING, "interval", "What time frame to use?", false)
             .addChoices(
-            new Command.Choice("Seconds", "sec"),
-            new Command.Choice("Minutes", "min"),
-            new Command.Choice("Hours", "hr")
-        )
-    };
+                new Command.Choice("Seconds", "sec"),
+                new Command.Choice("Minutes", "min"),
+                new Command.Choice("Hours", "hr")
+            )
+    );
 
     public AddRole() {
         super("add", "Adds a role to watch.");

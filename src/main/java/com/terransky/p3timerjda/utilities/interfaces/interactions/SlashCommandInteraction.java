@@ -162,7 +162,11 @@ public abstract class SlashCommandInteraction extends CommandInteraction<SlashCo
     }
 
     protected void addOptions(OptionData... option) {
-        options.addAll(Arrays.asList(option));
+        addOptions(Arrays.asList(option));
+    }
+
+    protected void addOptions(List<OptionData> options) {
+        this.options.addAll(options);
     }
 
     public boolean isNSFW() {
