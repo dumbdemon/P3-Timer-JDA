@@ -22,7 +22,7 @@ import java.util.concurrent.TimeUnit;
 
 public class AddRole extends SlashCommandInteraction {
 
-    public static OptionData[] ROLE_OPTIONS = {
+    public final static OptionData[] ROLE_OPTIONS = {
         new OptionData(OptionType.ROLE, "role", "The role to watch", true),
         new OptionData(OptionType.INTEGER, "timeout", "how long to timeout the role when mentioned.", false),
         new OptionData(OptionType.STRING, "interval", "What time frame to use?", false)
@@ -56,11 +56,18 @@ public class AddRole extends SlashCommandInteraction {
             default -> timeout = TimeUnit.HOURS.toSeconds(baseTimeout);
         }
 
-        if (blob.getGuild().getBotRole() == null || blob.getGuild().getBotRole().canInteract(watchedRole)) {
+        if (blob.getGuild().getBotRole() == null) {
+            event.replyComponents(StandardResponse.getResponseContainer(P3TimerJDA.NAME,
+                "No Bot role is present. Did you configure the invite correctly?",
+                BotColors.ERROR)
+            ).queue();
+            return null;
+        }
+        if (blob.getGuild().getBotRole().canInteract(watchedRole)) {
             event.replyComponents(StandardResponse.getResponseContainer(P3TimerJDA.NAME,
                 String.format("Unable to interact with %s. Please put my role [%s] higher than all of the roles to be watched.",
                     watchedRole.getAsMention(),
-                    blob.getGuild().getBotRole() == null ? "N/A" : blob.getGuild().getBotRole().getAsMention()
+                    blob.getGuild().getBotRole().getAsMention()
                 ), BotColors.ERROR)
             ).queue();
             return null;

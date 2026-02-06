@@ -71,22 +71,17 @@ public class RolesConfig {
             );
     }
 
-    public boolean addRole(long serverID, long roleID, long length) {
-        HashSet<RolesDatum> rolesData = new HashSet<>(getRolesDatum().toList());
-        Optional<RolesDatum> optionalRolesDatum = rolesData.stream().filter(data -> data.getServerID() == serverID)
-            .findFirst();
-        RolesDatum rolesDatum = optionalRolesDatum.orElseGet(() -> new RolesDatum(serverID));
-
-        rolesData.remove(rolesDatum);
-        List<RoleConfig> roleConfig = new ArrayList<>(rolesDatum.getRoles());
+    public boolean addRole(long serverID, long roleID, long timeout) {
+        List<RoleConfig> roleConfig = new ArrayList<>(getRolesDatum().toList()
+            .stream().filter(rolesDatum -> rolesDatum.getServerID() == serverID)
+            .findFirst()
+            .orElse(new RolesDatum(serverID))
+            .getRoles()
+        );
         if (roleConfig.stream().anyMatch(config -> config.getRoleID() == roleID))
             return false;
 
-        roleConfig.add(new RoleConfig(roleID, length));
-        rolesDatum.setRoles(roleConfig);
-        rolesData.add(rolesDatum);
-
-        return saveConfig(rolesData);
+        return saveRoleConfig(serverID, new RoleConfig(roleID, timeout));
     }
 
     public boolean updateRole(long serverID, long roleID, long timeout) {
@@ -98,7 +93,7 @@ public class RolesConfig {
             return false;
         else roleConfig.setTimeout(timeout);
 
-        return updateRole(serverID, roleConfig);
+        return saveRoleConfig(serverID, roleConfig);
     }
 
     public boolean updateRole(long serverID, long roleID, boolean isTimeout) {
@@ -110,41 +105,16 @@ public class RolesConfig {
             return false;
         else roleConfig.setTimeout(isTimeout);
 
-        return updateRole(serverID, null);
-    }
-
-    public boolean updateRole(long serverID, RoleConfig roleConfig) {
-        HashSet<RolesDatum> rolesData = new HashSet<>(getRolesDatum().toList());
-        Optional<RolesDatum> optionalRolesDatum = rolesData.stream().filter(data -> data.getServerID() == serverID)
-            .findFirst();
-
-        if (optionalRolesDatum.isEmpty())
-            return false;
-
-        RolesDatum newRolesDatum = optionalRolesDatum.get();
-        rolesData.remove(optionalRolesDatum.get());
-        List<RoleConfig> roles = new ArrayList<>(newRolesDatum.getRoles());
-        roles.stream().filter(oldRoleConfig -> roleConfig.getRoleID().equals(oldRoleConfig.getRoleID()))
-            .findFirst()
-            .ifPresent(roles::remove);
-
-        roles.add(roleConfig);
-        newRolesDatum.setRoles(roles);
-        rolesData.add(newRolesDatum);
-
-        return saveConfig(rolesData);
+        return saveRoleConfig(serverID, roleConfig);
     }
 
     public boolean setTimeout(@NotNull Guild guild, Role role) {
-        HashSet<RolesDatum> rolesData = new HashSet<>(getRolesDatum().toList());
-        Optional<RolesDatum> optionalRolesDatum = rolesData.stream().filter(rolesDatum -> rolesDatum.getServerID() == guild.getIdLong())
-            .findFirst();
+        Optional<RolesDatum> optionalRolesDatum = getRolesDatum().first(rolesDatum -> rolesDatum.getServerID() == guild.getIdLong());
 
         if (optionalRolesDatum.isEmpty())
             return false;
 
         RolesDatum rolesDatum = optionalRolesDatum.get();
-        rolesData.remove(rolesDatum);
         List<RoleConfig> roleConfigs = new ArrayList<>(rolesDatum.getRoles());
         Optional<RoleConfig> roleConfigOptional = roleConfigs.stream()
             .filter(roleConfig -> roleConfig.getRoleID() == role.getIdLong())
@@ -155,17 +125,11 @@ public class RolesConfig {
         }
 
         RoleConfig roleConfig = roleConfigOptional.get();
-        roleConfigs.remove(roleConfig);
 
         LocalDateTime now = LocalDateTime.now();
         roleConfig.setTimeout(true);
         roleConfig.setStartTime(now.toEpochSecond(ZoneOffset.of("+0")));
 
-        roleConfigs.add(roleConfig);
-        rolesDatum.setRoles(roleConfigs);
-        rolesData.add(rolesDatum);
-
-        saveConfig(rolesData);
         role.getManager().setMentionable(false).queue();
         new Timer().schedule(new TimeoutTask(role, guild.getIdLong()), TimeUnit.SECONDS.toMillis(roleConfig.getTimeout()));
         if (rolesDatum.getReportingChannelID() != RolesDatum.getDisabledChannel()) {
@@ -182,69 +146,57 @@ public class RolesConfig {
                 )
             ).queue();
         }
-        return true;
+        return saveRoleConfig(guild.getIdLong(), roleConfig);
     }
 
     public void verifyRoles(@NotNull Guild guild) throws InterruptedException {
         long serverID = guild.getIdLong();
-        RolesDatum rolesDatum = getRolesDatum().filter(datum -> datum.getServerID() == serverID)
-            .first()
-            .orElse(new RolesDatum(serverID));
 
-        int rolesModified = 0;
-        for (RoleConfig role : rolesDatum.getRoles()) {
-            if (guild.getRoleById(role.getRoleID()) == null) {
-                rolesDatum.getRoles().remove(role);
-                rolesModified++;
+        List<RoleConfig> rolesConfigs = new ArrayList<>(getRolesDatum().filter(datum -> datum.getServerID() == serverID)
+            .first()
+            .orElse(new RolesDatum(serverID))
+            .getRoles()
+        );
+
+        for (RoleConfig roleConfig : rolesConfigs) {
+            if (guild.getRoleById(roleConfig.getRoleID()) == null) {
+                rolesConfigs.remove(roleConfig);
                 continue;
             }
 
-            if (role.isTimeout()) {
-                LocalDateTime startTime = LocalDateTime.ofEpochSecond(role.getStartTime(), 0, ZoneOffset.of("+0"));
+            if (roleConfig.isTimeout()) {
+                LocalDateTime startTime = LocalDateTime.ofEpochSecond(roleConfig.getStartTime(), 0, ZoneOffset.of("+0"));
                 LocalDateTime now = LocalDateTime.now();
-                if (startTime.plusSeconds(role.getTimeout()).isBefore(now)) {
-                    rolesDatum.getRoles().remove(role);
-                    role.setTimeout(false);
-                    rolesDatum.getRoles().add(role);
-                    rolesModified++;
+                if (startTime.plusSeconds(roleConfig.getTimeout()).isBefore(now)) {
+                    rolesConfigs.remove(roleConfig);
+                    roleConfig.setTimeout(false);
+                    rolesConfigs.add(roleConfig);
                 } else {
                     long elapsedTime = now.toEpochSecond(ZoneOffset.of("+0")) - startTime.toEpochSecond(ZoneOffset.of("+0"));
-                    new Timer().schedule(new TimeoutTask(guild.getRoleById(role.getRoleID()), serverID), TimeUnit.SECONDS.toMillis(role.getTimeout() - elapsedTime));
+                    new Timer().schedule(new TimeoutTask(guild.getRoleById(roleConfig.getRoleID()), serverID), TimeUnit.SECONDS.toMillis(roleConfig.getTimeout() - elapsedTime));
                 }
             }
             Thread.sleep(200);
         }
 
-        if (rolesModified > 0) {
-            List<RolesDatum> rolesData = new ArrayList<>(getRolesDatum().toList());
-            rolesData.stream().filter(datum -> datum.getServerID() == serverID)
-                .findFirst()
-                .ifPresent(rolesData::remove);
-            rolesData.add(rolesDatum);
-            saveConfig(rolesData);
-        }
+        saveRoleConfig(serverID, rolesConfigs);
     }
 
     public boolean removeRole(long serverID, long roleID) {
-        HashSet<RolesDatum> rolesData = new HashSet<>(getRolesDatum().toList());
-        RolesDatum rolesDatum = rolesData.stream().filter(datum -> datum.getServerID() == serverID)
-            .findFirst()
-            .orElse(new RolesDatum(serverID));
-        rolesData.remove(rolesDatum);
-
-        List<RoleConfig> rolesConfigs = rolesDatum.getRoles();
+        List<RoleConfig> rolesConfigs = new ArrayList<>(getRolesDatum().first(datum -> datum.getServerID() == serverID)
+            .orElse(new RolesDatum(serverID))
+            .getRoles()
+        );
         rolesConfigs.stream()
             .filter(roleConfig -> roleConfig.getRoleID() == roleID)
             .findFirst()
             .ifPresent(rolesConfigs::remove);
-        rolesData.add(rolesDatum);
 
-        return saveConfig(rolesData);
+        return saveRoleConfig(serverID, rolesConfigs);
     }
 
     public long getReportingChannel(long serverID) {
-        Optional<RolesDatum> rolesDatum = getRolesDatum().filter(datum -> datum.getServerID() == serverID)
-            .first();
+        Optional<RolesDatum> rolesDatum = getRolesDatum().first(datum -> datum.getServerID() == serverID);
 
         AtomicLong channelID = new AtomicLong(0L);
 
@@ -266,6 +218,41 @@ public class RolesConfig {
         return saveConfig(rolesData);
     }
 
+    private boolean saveRoleConfig(long serverID, List<RoleConfig> roleConfigs) {
+        List<RolesDatum> rolesData = new ArrayList<>(getRolesDatum().toList());
+
+        RolesDatum rolesDatum = rolesData.stream().filter(roleData -> roleData.getServerID() == serverID)
+            .findFirst()
+            .orElse(new RolesDatum(serverID));
+        rolesData.remove(rolesDatum);
+
+        rolesDatum.setRoles(roleConfigs);
+        rolesData.add(rolesDatum);
+
+        return saveConfig(rolesData);
+    }
+
+    private boolean saveRoleConfig(long serverID, RoleConfig roleConfig) {
+        List<RolesDatum> rolesData = new ArrayList<>(getRolesDatum().toList());
+
+        RolesDatum rolesDatum = rolesData.stream().filter(roleData -> roleData.getServerID() == serverID)
+            .findFirst()
+            .orElse(new RolesDatum(serverID));
+        rolesData.remove(rolesDatum);
+
+        List<RoleConfig> roleConfigs = new ArrayList<>(rolesDatum.getRoles());
+
+        roleConfigs.stream().filter(config -> Objects.equals(config.getRoleID(), roleConfig.getRoleID()))
+            .findFirst()
+            .ifPresent(roleConfigs::remove);
+
+        roleConfigs.add(roleConfig);
+
+        rolesDatum.setRoles(roleConfigs);
+        rolesData.add(rolesDatum);
+
+        return saveConfig(rolesData);
+    }
 
     @NotNull
     @Contract(" -> new")

@@ -74,4 +74,10 @@ public class RolesDatum {
             return Objects.equals(this.getServerID(), rolesDatum.getServerID());
         return false;
     }
+
+    @JsonIgnore
+    @Override
+    public int hashCode() {
+        return Objects.hash(getServerID(), getReportingChannelID(), getRoles());
+    }
 }

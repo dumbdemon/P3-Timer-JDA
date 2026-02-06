@@ -1,5 +1,5 @@
 token:
-colors:
+colors: #Use Hex triplets without the # symbol. That creates a comment
   main: 62F853
   sub: 15624B
   error: db7093
