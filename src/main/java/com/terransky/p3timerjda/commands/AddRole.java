@@ -22,7 +22,7 @@ import java.util.concurrent.TimeUnit;
 
 public class AddRole extends SlashCommandInteraction {
 
-    public final static OptionData[] ROLE_OPTIONS = {
+    public static final OptionData[] ROLE_OPTIONS = {
         new OptionData(OptionType.ROLE, "role", "The role to watch", true),
         new OptionData(OptionType.INTEGER, "timeout", "how long to timeout the role when mentioned.", false),
         new OptionData(OptionType.STRING, "interval", "What time frame to use?", false)
