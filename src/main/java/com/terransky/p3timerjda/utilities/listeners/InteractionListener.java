@@ -92,7 +92,6 @@ public class InteractionListener extends ListenerAdapter {
             .setChannelUnion(event.getChannel());
 
         SlashCommandInteraction slash = ifSlash.get();
-        log.debug("Command {} called on {} [{}]", slash.getName().toUpperCase(), blob.getGuildName(), blob.getGuildIdLong());
 
         if (slash.isOwnerOnly() && !blob.getMember().isOwner()) {
             commandIsOwnerOnly(event, blob);
@@ -107,6 +106,7 @@ public class InteractionListener extends ListenerAdapter {
         }
 
         try {
+            slash.logInteraction(log);
             slash.execute(event, blob);
         } catch (RuntimeException | IOException | ExecutionException | InterruptedException e) {
             log.debug("Full command path that triggered error :: [{}]", event.getFullCommandName());
@@ -128,7 +128,6 @@ public class InteractionListener extends ListenerAdapter {
             .setChannelUnion(event.getChannel());
 
         MessageCommandInteraction commandMessage = ifMenu.get();
-        logInteractionEvent(commandMessage, blob);
 
         if (commandMessage.isOwnerOnly() && !blob.getMember().isOwner()) {
             commandIsOwnerOnly(event, blob);
@@ -143,6 +142,7 @@ public class InteractionListener extends ListenerAdapter {
         }
 
         try {
+            commandMessage.logInteraction(log);
             commandMessage.execute(event, blob);
         } catch (RuntimeException | IOException | ExecutionException | InterruptedException e) {
             errorHandler(event, commandMessage, blob, e);
@@ -162,7 +162,6 @@ public class InteractionListener extends ListenerAdapter {
             .setInteractionType(InteractionType.COMMAND_USER);
 
         UserCommandInteraction commandUser = ifMenu.get();
-        logInteractionEvent(commandUser, blob);
 
         if (commandUser.isOwnerOnly() && !blob.getMember().isOwner()) {
             commandIsOwnerOnly(event, blob);
@@ -178,14 +177,11 @@ public class InteractionListener extends ListenerAdapter {
 
 
         try {
+            commandUser.logInteraction(log);
             commandUser.execute(event, blob);
         } catch (RuntimeException | IOException | ExecutionException | InterruptedException e) {
             errorHandler(event, commandUser, blob, e);
         }
-    }
-
-    private <T extends IInteraction<?>> void logInteractionEvent(@NotNull T interaction, @NotNull EventBlob blob) {
-        log.debug("Command \"{}\" called on {} [{}]", interaction.getName().toUpperCase(), blob.getGuildName(), blob.getGuildIdLong());
     }
 
     @Override
@@ -202,8 +198,8 @@ public class InteractionListener extends ListenerAdapter {
             .setChannelUnion(event.getChannel());
 
         ButtonInteraction iButton = ifButton.get();
-        log.debug("Button {}<{}> called on {} [{}]", iButton.getName().toUpperCase(), event.getComponentId(), blob.getGuildName(), blob.getGuildIdLong());
         try {
+            iButton.logInteraction(log, String.format("%s<%s>", iButton.getNameReadable(), event.getComponentId()));
             iButton.execute(event, blob);
         } catch (RuntimeException | IOException | ExecutionException | InterruptedException e) {
             errorHandler(event, iButton, blob, e);
@@ -223,8 +219,8 @@ public class InteractionListener extends ListenerAdapter {
             .setInteractionType(InteractionType.SELECTION_ENTITY)
             .setChannelUnion(event.getChannel());
         SelectMenuEntityInteraction menu = ifMenu.get();
-        logSelectMenu(menu.getName().toUpperCase(), blob);
         try {
+            menu.logInteraction(log);
             menu.execute(event, blob);
         } catch (RuntimeException | IOException | ExecutionException | InterruptedException e) {
             errorHandler(event, menu, blob, e);
@@ -244,8 +240,8 @@ public class InteractionListener extends ListenerAdapter {
             .setInteractionType(InteractionType.MODAL)
             .setChannelUnion(event.getChannel());
         ModalInteraction modal = ifModal.get();
-        log.debug("Modal {} called on {} [{}]", modal.getName().toUpperCase(), blob.getGuild().getName(), blob.getGuildIdLong());
         try {
+            modal.logInteraction(log);
             modal.execute(event, blob);
         } catch (RuntimeException | IOException | ExecutionException | InterruptedException e) {
             logInteractionFailure(modal.getName(), blob.getGuildId(), e);
@@ -272,17 +268,12 @@ public class InteractionListener extends ListenerAdapter {
             .setChannelUnion(event.getChannel());
 
         for (SelectMenuStringInteraction stringMenu : menus) {
-            String interactionName = "%s[%s]".formatted(componentId.toUpperCase(), stringMenu.getName().toUpperCase());
-            logSelectMenu(interactionName, blob);
             try {
+                stringMenu.logInteraction(log, String.format("%s<%s>", componentId.toUpperCase(), stringMenu.getNameReadable()));
                 stringMenu.execute(event, blob);
             } catch (RuntimeException | IOException | ExecutionException | InterruptedException e) {
                 errorHandler(event, stringMenu, blob, e);
             }
         }
-    }
-
-    private void logSelectMenu(String interactionName, @NotNull EventBlob blob) {
-        log.debug("Select Menu {} called on {} [{}]", interactionName, blob.getGuildName(), blob.getGuildIdLong());
     }
 }

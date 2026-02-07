@@ -24,7 +24,7 @@ public class P3TimerJDA {
         add("https://github.com/dumbdemon");
         add("https://github.com/guilhermesantos0");
     }};
-    public static final String NAME = "P3 Timer [JDA]";
+    public static final String NAME;
     private static final ConfigHandler HANDLER;
     private static final String TOKEN;
     private static final AtomicReference<RolesConfig> rolesConfigAtomicReference;
@@ -37,6 +37,7 @@ public class P3TimerJDA {
         }
         TOKEN = getConfig().getToken();
         rolesConfigAtomicReference = new AtomicReference<>(new RolesConfig());
+        NAME = getConfig().getName();
     }
 
     static void main() {

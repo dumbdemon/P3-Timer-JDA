@@ -1,4 +1,7 @@
 token:
+name: P3 Timer [JDA]
+description: |
+  Watching for pings to ensure protection against spamming.
 colors: #Use Hex triplets without the # symbol. That creates a comment
   main: 62F853
   sub: 15624B

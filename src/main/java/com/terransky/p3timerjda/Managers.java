@@ -1,18 +1,12 @@
 package com.terransky.p3timerjda;
 
 
-import com.terransky.p3timerjda.commands.AddRole;
-import com.terransky.p3timerjda.commands.RemoveRole;
-import com.terransky.p3timerjda.commands.SetReportingChannel;
-import com.terransky.p3timerjda.commands.UpdateRole;
-import com.terransky.p3timerjda.utilities.command.SlashCommandMetadata;
+import com.terransky.p3timerjda.commands.*;
 import com.terransky.p3timerjda.utilities.general.InteractionType;
 import com.terransky.p3timerjda.utilities.interfaces.interactions.*;
 import com.terransky.p3timerjda.utilities.managers.ButtonInteractionManager;
 import com.terransky.p3timerjda.utilities.managers.CommandInteractionManager;
 import com.terransky.p3timerjda.utilities.managers.InteractionManager;
-
-import java.util.List;
 
 public class Managers {
 
@@ -23,17 +17,11 @@ public class Managers {
 
         public SlashCommands() {
             super(InteractionType.COMMAND_SLASH);
+            addInteraction(new About());
             addInteraction(new AddRole());
             addInteraction(new RemoveRole());
             addInteraction(new SetReportingChannel());
             addInteraction(new UpdateRole());
-        }
-
-        public List<SlashCommandMetadata> getCommandMetadata() {
-            return interactions.stream()
-                .map(SlashCommandMetadata::new)
-                .sorted()
-                .toList();
         }
     }
 

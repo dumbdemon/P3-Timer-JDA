@@ -11,13 +11,12 @@ import net.dv8tion.jda.api.events.interaction.component.EntitySelectInteractionE
 import net.dv8tion.jda.api.events.interaction.component.StringSelectInteractionEvent;
 import org.apache.commons.text.WordUtils;
 import org.jetbrains.annotations.NotNull;
+import org.slf4j.Logger;
 
 import java.io.IOException;
 import java.util.concurrent.ExecutionException;
 
 public interface IInteraction<T extends GenericInteractionCreateEvent> extends Comparable<IInteraction<T>> {
-
-    int MAX_MESSAGE_LENGTH = 4000 - 32;
 
     /**
      * The name or ID reference of this bot element.
@@ -37,6 +36,14 @@ public interface IInteraction<T extends GenericInteractionCreateEvent> extends C
      */
     default InteractionType getInteractionType() {
         return InteractionType.UNKNOWN;
+    }
+
+    default void logInteraction(@NotNull Logger logger, String name) {
+        logger.info("{}} called > {}", getInteractionType().getName(), name);
+    }
+
+    default void logInteraction(@NotNull Logger logger) {
+        logInteraction(logger, getName());
     }
 
 

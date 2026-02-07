@@ -6,6 +6,8 @@ import com.terransky.p3timerjda.utilities.general.configObjects.Colors;
 public class Config {
 
     private String token;
+    private String name;
+    private String description;
     private Colors colors;
 
     Config() {
@@ -17,6 +19,22 @@ public class Config {
 
     public void setToken(String token) {
         this.token = token;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getDescription() {
+        return this.description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
     }
 
     public Colors getColors() {

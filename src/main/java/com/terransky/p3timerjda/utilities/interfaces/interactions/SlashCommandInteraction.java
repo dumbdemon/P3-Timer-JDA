@@ -7,16 +7,11 @@ import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEve
 import net.dv8tion.jda.api.interactions.IntegrationType;
 import net.dv8tion.jda.api.interactions.commands.DefaultMemberPermissions;
 import net.dv8tion.jda.api.interactions.commands.build.*;
-import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
-import java.time.*;
-import java.time.format.DateTimeFormatter;
-import java.time.format.DateTimeFormatterBuilder;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.TimeZone;
 
 public abstract class SlashCommandInteraction extends CommandInteraction<SlashCommandInteractionEvent> {
 
@@ -31,128 +26,11 @@ public abstract class SlashCommandInteraction extends CommandInteraction<SlashCo
         this.description = description;
     }
 
-    /**
-     * Get an {@link OffsetDateTime} from a string
-     *
-     * @param date     Date string
-     * @param timeZone The current time zone
-     * @return An {@link OffsetDateTime}
-     */
-    @NotNull
-    public static OffsetDateTime parseDate(@NotNull String date, TimeZone timeZone) {
-        if (timeZone == null) return parseDate(date, TimeZone.getDefault());
-        ZoneId here = timeZone.toZoneId();
-        ZonedDateTime hereAndNow = Instant.now().atZone(here);
-        return OffsetDateTime.parse(date.replace("Z", String.format("%tz", hereAndNow)),
-            new DateTimeFormatterBuilder()
-                .parseCaseInsensitive()
-                .append(DateTimeFormatter.ISO_LOCAL_DATE)
-                .appendLiteral('T')
-                .append(DateTimeFormatter.ISO_LOCAL_TIME)
-                .optionalStart()
-                .parseLenient()
-                .appendOffset("+HHMMss", "Z")
-                .parseStrict()
-                .toFormatter()
-        );
-    }
-
-    /**
-     * Create an {@link OffsetDateTime} based on provided dighit of tha day.
-     * This will assume the time zone the server is currently in.
-     *
-     * @param year  The year
-     * @param month The month
-     * @param day   The day
-     * @param hour  Hour of the day.
-     * @param min   Minute  of the hour.
-     * @param time  A {@link TimeZone} to add the appropriate offset.
-     * @return An {@link OffsetDateTime}
-     */
-    @NotNull
-    public static OffsetDateTime parseDate(int year, int month, int day, int hour, int min, Time time) {
-        return parseDate(year, month, day, hour, min, time, TimeZone.getDefault());
-    }
-
-    /**
-     * Create an {@link OffsetDateTime} based on provided digit of tha day.
-     * This will assume the time zone the server is currently in.
-     *
-     * @param year     The year
-     * @param month    The month
-     * @param day      The day
-     * @param hour     Hour of the day.
-     * @param min      Minute of the hour.
-     * @param time     Whether the hour is {@link Time#AM AM} or {@link Time#PM PM}
-     * @param timeZone A {@link TimeZone} to add the appropriate offset.
-     * @return An {@link OffsetDateTime}
-     */
-    @NotNull
-    public static OffsetDateTime parseDate(int year, int month, int day, int hour, int min, Time time, TimeZone timeZone) {
-        if (time == Time.PM) {
-            hour += 12;
-        }
-        return parseDate(year, month, day, hour, min, timeZone);
-    }
-
-    /**
-     * Create an {@link OffsetDateTime} based on provided dighit of tha day.
-     * This will assume the time zone the server is currently in.
-     *
-     * @param year  The year
-     * @param month The month
-     * @param day   The day
-     * @param hour  Hour of a 24 day.
-     * @param min   Minute  of the hour.
-     * @return An {@link OffsetDateTime}
-     */
-    @NotNull
-    public static OffsetDateTime parseDate(int year, int month, int day, int hour, int min) {
-        return parseDate(year, month, day, hour, min, TimeZone.getDefault());
-    }
-
-    /**
-     * Create an {@link OffsetDateTime} based on provided dighit of tha day.
-     *
-     * @param year     The year
-     * @param month    The month
-     * @param day      The day
-     * @param hour     Hour of a 24 day.
-     * @param min      Minute  of the hour.
-     * @param timeZone A {@link TimeZone} to add the appropriate offset.
-     * @return An {@link OffsetDateTime}
-     */
-    @NotNull
-    public static OffsetDateTime parseDate(int year, int month, int day, int hour, int min, TimeZone timeZone) {
-        return parseDate(String.format("%d-%02d-%02dT%02d:%02dZ", year,
-            Math.min(Math.max(month, 1), Month.values().length),
-            Math.min(Math.max(day, 1), Month.of(month).maxLength()),
-            Math.min(Math.max(hour, 0), 23),
-            Math.min(Math.max(min, 1), 59)
-        ), timeZone);
-    }
-
-    /**
-     * Get an {@link OffsetDateTime} from a string
-     *
-     * @param date Date string
-     * @return An {@link OffsetDateTime}
-     */
-    @NotNull
-    public static OffsetDateTime parseDate(@NotNull String date) {
-        return parseDate(date, TimeZone.getDefault());
-    }
-
-    @NotNull
-    @Contract(" -> new")
-    public static OffsetDateTime now() {
-        return OffsetDateTime.now();
-    }
-
     public String getDescription() {
         return description;
     }
 
+    @SuppressWarnings("unused")
     protected void addSubcommandGroups(SubcommandGroupData... subcommandGroup) {
         subcommandGroups.addAll(Arrays.asList(subcommandGroup));
     }
@@ -173,6 +51,7 @@ public abstract class SlashCommandInteraction extends CommandInteraction<SlashCo
         return isNSFW;
     }
 
+    @SuppressWarnings("unused")
     protected void setNSFW() {
         isNSFW = true;
     }
@@ -200,10 +79,5 @@ public abstract class SlashCommandInteraction extends CommandInteraction<SlashCo
         }
 
         return commandData;
-    }
-
-    public enum Time {
-        AM,
-        PM
     }
 }
