@@ -195,6 +195,14 @@ public class RolesConfig {
         return saveRoleConfig(serverID, rolesConfigs);
     }
 
+    public boolean isWatching(@NotNull Guild guild, Role role) {
+        return getRolesDatum().first(rolesDatum -> rolesDatum.getServerID() == guild.getIdLong())
+            .orElse(new RolesDatum(guild.getIdLong()))
+            .getRoles()
+            .stream()
+            .anyMatch(roleConfig -> roleConfig.getRoleID() == role.getIdLong());
+    }
+
     public long getReportingChannel(long serverID) {
         Optional<RolesDatum> rolesDatum = getRolesDatum().first(datum -> datum.getServerID() == serverID);
 

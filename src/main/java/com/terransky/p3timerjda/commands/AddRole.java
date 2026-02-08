@@ -64,7 +64,7 @@ public class AddRole extends SlashCommandInteraction {
             ).queue();
             return null;
         }
-        if (blob.getGuild().getBotRole().canInteract(watchedRole)) {
+        if (!blob.getGuild().getBotRole().canInteract(watchedRole)) {
             event.replyComponents(StandardResponse.getResponseContainer(P3TimerJDA.NAME,
                 String.format("Unable to interact with %s. Please put my role [%s] higher than all of the roles to be watched.",
                     watchedRole.getAsMention(),
@@ -73,6 +73,14 @@ public class AddRole extends SlashCommandInteraction {
             ).queue();
             return null;
         }
+        if (!watchedRole.isMentionable() && !P3TimerJDA.getRolesConfig().get().isWatching(blob.getGuild(), watchedRole)) {
+            event.replyComponents(StandardResponse.getResponseContainer(P3TimerJDA.NAME,
+                String.format("%s provided is not mentionable. Please enable it in settings or choose a different role.)", watchedRole.getAsMention()),
+                BotColors.ERROR)
+            ).queue();
+            return null;
+        }
+
         return new WatchedRole(baseTimeout, interval, timeout, watchedRole);
     }
 

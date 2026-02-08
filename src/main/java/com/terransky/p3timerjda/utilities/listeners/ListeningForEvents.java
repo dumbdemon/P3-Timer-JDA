@@ -25,6 +25,7 @@ import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.*;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 
@@ -40,6 +41,11 @@ public class ListeningForEvents extends ListenerAdapter {
             .addCommands((new Managers.UserContextMenu()).getCommandData())
             .addCommands((new Managers.MessageContextMenu()).getCommandData())
             .queue(commands -> log.info("{} global commands loaded!", commands.size()), DiscordAPIException::new);
+
+        createInviteLinkFile(jda.getInviteUrl(
+            Permission.MANAGE_ROLES,
+            Permission.MESSAGE_SEND
+        ));
 
         long timer = TimeUnit.MINUTES.toMillis(10);
         new Timer().scheduleAtFixedRate(new SetWatcherTask(jda.getShardManager()), timer, timer);
@@ -105,6 +111,30 @@ public class ListeningForEvents extends ListenerAdapter {
                         String.format("%s went on timeout.", role.getAsMention()),
                         BotColors.SUB_DEFAULT
                     )).queue();
+            }
+        }
+    }
+
+    private void createInviteLinkFile(@NotNull String inviteUrl) {
+        File inviteLink = new File("inviteLink.txt");
+
+        if (!inviteLink.exists()) {
+            try (BufferedWriter writer = new BufferedWriter(new FileWriter(inviteLink))) {
+                writer.write(inviteUrl);
+                log.info("Invite link created at \"{}\"", inviteLink.getAbsolutePath());
+            } catch (IOException e) {
+                log.error("Unable to create invite link file.", e);
+            }
+        } else {
+            try (BufferedReader reader = new BufferedReader(new FileReader(inviteLink))) {
+                if (inviteUrl.equals(reader.readLine())) {
+                    log.info("Invite link exists at \"{}\". Moving on.", inviteLink.getAbsolutePath());
+                } else try (BufferedWriter writer = new BufferedWriter(new FileWriter(inviteLink))) {
+                    writer.write(inviteUrl);
+                    log.info("Invite Link file has been modified at \"{}\"", inviteLink.getAbsolutePath());
+                }
+            } catch (IOException e) {
+                log.error("Unable to read invite link file.", e);
             }
         }
     }

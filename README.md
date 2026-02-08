@@ -30,18 +30,17 @@ First you'll need a Discord token. Then decide how you'll run the bot.
 13. Toggle on `Message Content Intent`. **If you do not toggle this on, the bot will not function.**\
     ![AuthFlow.png](images/AuthFlow.png)
 
-### With AMP (preferred)
+### With AMP (Highly Recommended)
 
 With [AMP](https://cubecoders.com/AMP) or Application Management Panel by CubeCoders you'll be able to run the bot as
-well as
-easily update the bot and restart it very easily. It is one-time payment for a lifetime license for $10 USD
+well as easily update the bot and restart it very easily. It is one-time payment for a lifetime license for $10 USD
 for the Starter Edition for 5 instances. You can also use this to run Minecraft or any Steam servers.
 
 1. Head to [AMP Install page](https://cubecoders.com/AMP/Install) and download the correct version for your OS/server.
 2. Complete the installation set up (HTTPS not required; Docker container recommended).
-3. In the `Instances` page, click `Create Instance`.
-   ![sajiklI.png](images/CreateInstance.png)
-4. Under the `Select Application` dropdown, choose `Java App Runner`.
+3. In the `Instances` page, click `Create Instance`.\
+   ![CreateInstance.png](images/CreateInstance.png)
+4. Under the `Select Application` dropdown, choose `Java App Runner`.\
    ![JavaAppRunner.png](images/JavaAppRunner.png)
 5. Under `After Creation`, select `Do Nothing`.\
    ![AfterCreation.png](images/AfterCreation.png)
@@ -51,8 +50,8 @@ for the Starter Edition for 5 instances. You can also use this to run Minecraft 
 8. Head to `Configuration` > `Java App Runner`
 9. Under `Java Version`, select `Specific instance version`.\
    ![JavaInstanceVersion.png](images/JavaInstanceVersion.png)
-10. Under `Specific Instance Java Version`, select `25 - LTS`.
-    ![JavaInstanceVersion.png](images/JavaInstanceVersion.png)
+10. Under `Specific Instance Java Version`, select `25 - LTS`.\
+    ![JavaVersion25.png](images/JavaVersion25.png)
 11. Under `Download` tab, in the `App Download Type` dropdown, select `Download URL`
     ![AppDownloadType.png](images/AppDownloadType.png)
 12. Head to [releases](https://github.com/dumbdemon/P3-Timer-JDA/releases) and copy the link to the latest zip file
@@ -80,6 +79,8 @@ for the Starter Edition for 5 instances. You can also use this to run Minecraft 
 Your bot is now running, and you should be able to invite the bot and run commands without issues.
 
 ### Without AMP
+
+This method is far more complicated and requires knowledge about your specific OS.
 
 1. Head to [releases](https://github.com/dumbdemon/P3-Timer-JDA/releases) and download the latest
    version of the zip file of the bot.
