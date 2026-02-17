@@ -2,6 +2,8 @@ package com.terransky.p3timerjda;
 
 
 import com.terransky.p3timerjda.commands.*;
+import com.terransky.p3timerjda.contextMenus.message.LockRoleFromMessage;
+import com.terransky.p3timerjda.modals.WatchRole;
 import com.terransky.p3timerjda.utilities.general.InteractionType;
 import com.terransky.p3timerjda.utilities.interfaces.interactions.*;
 import com.terransky.p3timerjda.utilities.managers.ButtonInteractionManager;
@@ -35,6 +37,7 @@ public class Managers {
 
         public MessageContextMenu() {
             super(InteractionType.COMMAND_MESSAGE);
+            addInteraction(new LockRoleFromMessage());
         }
     }
 
@@ -63,6 +66,7 @@ public class Managers {
 
         public ModalInteractions() {
             super(InteractionType.MODAL);
+            addInteraction(new WatchRole());
         }
     }
 }

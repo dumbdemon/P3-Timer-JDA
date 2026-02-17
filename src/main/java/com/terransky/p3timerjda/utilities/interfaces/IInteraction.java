@@ -39,7 +39,7 @@ public interface IInteraction<T extends GenericInteractionCreateEvent> extends C
     }
 
     default void logInteraction(@NotNull Logger logger, String name) {
-        logger.info("{}} called > {}", getInteractionType().getName(), name);
+        logger.info("{} called > {}", getInteractionType().getName(), name);
     }
 
     default void logInteraction(@NotNull Logger logger) {

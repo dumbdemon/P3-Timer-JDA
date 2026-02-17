@@ -8,8 +8,6 @@ import com.terransky.p3timerjda.utilities.general.InteractionType;
 import com.terransky.p3timerjda.utilities.interfaces.IInteraction;
 import com.terransky.p3timerjda.utilities.interfaces.interactions.*;
 import net.dv8tion.jda.api.components.container.Container;
-import net.dv8tion.jda.api.components.separator.Separator;
-import net.dv8tion.jda.api.components.textdisplay.TextDisplay;
 import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.command.GenericCommandInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.command.MessageContextInteractionEvent;
@@ -35,25 +33,6 @@ public class InteractionListener extends ListenerAdapter {
     private final Logger log = LoggerFactory.getLogger(InteractionListener.class);
 
     @NotNull
-    private Container getDisabledMessage(String message) {
-        return StandardResponse.getResponseContainer("This command has been disabled!",
-            List.of(
-                TextDisplay.of("### There is an issue with this command and will need to be disabled until further notice."),
-                Separator.createDivider(Separator.Spacing.SMALL),
-                TextDisplay.of(String.format("### Reason%n```%s```", message))
-            )
-        );
-    }
-
-    private void commandIsOwnerOnly(@NotNull GenericCommandInteractionEvent event, @NotNull EventBlob blob) {
-        String typeName = blob.getInteractionType().getName();
-        event.replyComponents(
-            StandardResponse.getResponseContainer(String.format("%s is Owner Only", typeName),
-                String.format("This %s can only be ran by the Owner.", typeName))
-        ).setEphemeral(true).queue();
-    }
-
-    @NotNull
     private Container getFailedInteractionMessage(@NotNull EventBlob blob) {
         return StandardResponse.getResponseContainer("Interaction Failure",
             String.format("%s failed. Please contact the developer.", blob.getInteractionType().getName()),
@@ -68,13 +47,17 @@ public class InteractionListener extends ListenerAdapter {
     private void errorHandler(@NotNull GenericCommandInteractionEvent event, @NotNull IInteraction<?> interaction, EventBlob blob, Exception e) {
         Container commandFailed = getFailedInteractionMessage(blob);
         logInteractionFailure(interaction.getName(), blob.getGuildId(), e);
-        event.replyComponents(commandFailed).setEphemeral(true).queue();
+        if (event.isAcknowledged())
+            event.getHook().sendMessageComponents(commandFailed).queue();
+        else event.replyComponents(commandFailed).setEphemeral(true).queue();
     }
 
     private void errorHandler(@NotNull GenericComponentInteractionCreateEvent event, @NotNull IInteraction<?> interaction, EventBlob blob, Exception e) {
         Container commandFailed = getFailedInteractionMessage(blob);
         logInteractionFailure(interaction.getName(), blob.getGuildId(), e);
-        event.replyComponents(commandFailed).setEphemeral(true).queue();
+        if (event.isAcknowledged())
+            event.getHook().sendMessageComponents(commandFailed).queue();
+        else event.replyComponents(commandFailed).setEphemeral(true).queue();
     }
 
     @Override
@@ -92,18 +75,6 @@ public class InteractionListener extends ListenerAdapter {
             .setChannelUnion(event.getChannel());
 
         SlashCommandInteraction slash = ifSlash.get();
-
-        if (slash.isOwnerOnly() && !blob.getMember().isOwner()) {
-            commandIsOwnerOnly(event, blob);
-            return;
-        }
-
-        if (slash.isDisabled()) {
-            event.replyComponents(getDisabledMessage(slash.getDisabledReason()))
-                .setEphemeral(true)
-                .queue();
-            return;
-        }
 
         try {
             slash.logInteraction(log);
@@ -129,18 +100,6 @@ public class InteractionListener extends ListenerAdapter {
 
         MessageCommandInteraction commandMessage = ifMenu.get();
 
-        if (commandMessage.isOwnerOnly() && !blob.getMember().isOwner()) {
-            commandIsOwnerOnly(event, blob);
-            return;
-        }
-
-        if (commandMessage.isDisabled()) {
-            event.replyComponents(getDisabledMessage(commandMessage.getDisabledReason()))
-                .setEphemeral(true)
-                .queue();
-            return;
-        }
-
         try {
             commandMessage.logInteraction(log);
             commandMessage.execute(event, blob);
@@ -162,19 +121,6 @@ public class InteractionListener extends ListenerAdapter {
             .setInteractionType(InteractionType.COMMAND_USER);
 
         UserCommandInteraction commandUser = ifMenu.get();
-
-        if (commandUser.isOwnerOnly() && !blob.getMember().isOwner()) {
-            commandIsOwnerOnly(event, blob);
-            return;
-        }
-
-        if (commandUser.isDisabled()) {
-            event.replyComponents(getDisabledMessage(commandUser.getDisabledReason()))
-                .setEphemeral(true)
-                .queue();
-            return;
-        }
-
 
         try {
             commandUser.logInteraction(log);
@@ -245,7 +191,9 @@ public class InteractionListener extends ListenerAdapter {
             modal.execute(event, blob);
         } catch (RuntimeException | IOException | ExecutionException | InterruptedException e) {
             logInteractionFailure(modal.getName(), blob.getGuildId(), e);
-            event.replyComponents(getFailedInteractionMessage(blob)).queue();
+            if (event.isAcknowledged())
+                event.getHook().sendMessageComponents(getFailedInteractionMessage(blob)).queue();
+            else event.replyComponents(getFailedInteractionMessage(blob)).queue();
         }
     }
 

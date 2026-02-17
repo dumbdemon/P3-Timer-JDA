@@ -61,7 +61,7 @@ public class RolesConfig {
         return saveConfig(rolesData);
     }
 
-    private Optional<RoleConfig> getRole(long serverID, long roleID) {
+    public Optional<RoleConfig> getRole(long serverID, long roleID) {
         return getRolesDatum().filter(rolesDatum -> rolesDatum.getServerID() == serverID)
             .first()
             .flatMap(rolesDatum -> rolesDatum
@@ -79,9 +79,9 @@ public class RolesConfig {
             .getRoles()
         );
         if (roleConfig.stream().anyMatch(config -> config.getRoleID() == roleID))
-            return false;
+            return true;
 
-        return saveRoleConfig(serverID, new RoleConfig(roleID, timeout));
+        return !saveRoleConfig(serverID, new RoleConfig(roleID, timeout));
     }
 
     public boolean updateRole(long serverID, long roleID, long timeout) {

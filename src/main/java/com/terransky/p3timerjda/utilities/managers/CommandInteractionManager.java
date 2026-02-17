@@ -2,7 +2,6 @@ package com.terransky.p3timerjda.utilities.managers;
 
 import com.terransky.p3timerjda.utilities.general.InteractionType;
 import com.terransky.p3timerjda.utilities.interfaces.interactions.CommandInteraction;
-import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.interactions.commands.build.CommandData;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.LoggerFactory;
@@ -28,25 +27,6 @@ public class CommandInteractionManager<T extends CommandInteraction<?>> extends 
     public List<CommandData> getCommandData() {
         List<T> toDeployInteractions = interactions.stream()
             .filter(CommandInteraction::isWorking)
-            .filter(interaction -> !interaction.isGuildPrivate())
-            .toList();
-        int limit;
-
-        if (!toDeployInteractions.isEmpty()) {
-            limit = getLimit(toDeployInteractions);
-        } else return new ArrayList<>();
-
-        return toDeployInteractions.stream()
-            .limit(limit)
-            .map(CommandInteraction::getCommandData)
-            .toList();
-    }
-
-    public List<CommandData> getCommandData(Guild guild) {
-        List<T> toDeployInteractions = interactions.stream()
-            .filter(CommandInteraction::isWorking)
-            .filter(CommandInteraction::isGuildPrivate)
-            .filter(interaction -> interaction.getRestrictedServers().contains(guild.getIdLong()))
             .toList();
         int limit;
 

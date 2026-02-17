@@ -9,7 +9,7 @@ application {
 }
 
 group = 'com.terransky.p3timerjda'
-version = '0.2.1'
+version = '0.3.0'
 
 shadowJar {
     archiveBaseName = 'p3timerjda'

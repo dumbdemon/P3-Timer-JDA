@@ -3,6 +3,7 @@ package com.terransky.p3timerjda.commands;
 import com.terransky.p3timerjda.P3TimerJDA;
 import com.terransky.p3timerjda.utilities.command.EventBlob;
 import com.terransky.p3timerjda.utilities.command.StandardResponse;
+import com.terransky.p3timerjda.utilities.command.WatchedRole;
 import com.terransky.p3timerjda.utilities.exceptions.FailedInteractionException;
 import com.terransky.p3timerjda.utilities.interfaces.interactions.SlashCommandInteraction;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
@@ -19,7 +20,7 @@ public class UpdateRole extends SlashCommandInteraction {
 
     @Override
     public void execute(@NotNull SlashCommandInteractionEvent event, EventBlob blob) throws FailedInteractionException, IOException {
-        AddRole.WatchedRole watchedRole = AddRole.getWatchedRole(event, blob);
+        WatchedRole watchedRole = AddRole.getWatchedRole(event, blob);
         if (watchedRole == null) return;
 
         if (!P3TimerJDA.getRolesConfig().get().updateRole(blob.getGuildIdLong(), watchedRole.watchedRole().getIdLong(), watchedRole.timeout())) {
