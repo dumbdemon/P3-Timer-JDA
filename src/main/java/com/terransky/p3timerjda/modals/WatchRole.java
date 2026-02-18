@@ -19,7 +19,6 @@ import net.dv8tion.jda.api.modals.Modal;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -35,25 +34,18 @@ public class WatchRole extends ModalInteractionImpl<List<Role>> {
 
     @Override
     public Modal getContructedModal(@NotNull List<Role> roles) {
+        List<SelectOption> roleOptions = roles.stream().map(role -> SelectOption.of(role.getName(), role.getId())).toList();
+        StringSelectMenu.Builder roleMenu = StringSelectMenu.create(MODAL_ROLES)
+            .addOptions(roleOptions)
+            .setRequired(true);
+
+        if (!roles.isEmpty())
+            roleMenu.setDefaultOptions(roleOptions.get(0));
+
         return getBuilder()
             .addComponents(
-                Label.of("Role", StringSelectMenu.create(MODAL_ROLES)
-                    .addOptions(
-                        new ArrayList<>() {{
-                            roles.forEach(role -> add(SelectOption.of(role.getName(), role.getId())));
-                        }}
-                    )
-                    .setDefaultOptions(
-                        new ArrayList<>() {{
-                            if (roles.size() == 1) {
-                                Role role = roles.get(0);
-                                add(SelectOption.of(role.getName(), role.getId()));
-                            }
-                        }}
-                    )
-                    .setRequired(true)
-                    .build()
-                ), Label.of("Timeout", TextInput.create(MODAL_TIMEOUT, TextInputStyle.SHORT)
+                Label.of("Role", roleMenu.build()),
+                Label.of("Timeout", TextInput.create(MODAL_TIMEOUT, TextInputStyle.SHORT)
                     .setRequired(true)
                     .build()
                 ),

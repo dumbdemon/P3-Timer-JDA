@@ -1,6 +1,6 @@
 [![CodeFactor](https://www.codefactor.io/repository/github/dumbdemon/p3-timer-jda/badge/master)](https://www.codefactor.io/repository/github/dumbdemon/p3-timer-jda/overview/master)
 [![DeepSource](https://app.deepsource.com/gh/dumbdemon/P3-Timer-JDA.svg/?label=active+issues&show_trend=true&token=N1UQwP9E-TXcd0LRAYatbs3_)](https://app.deepsource.com/gh/dumbdemon/P3-Timer-JDA/)\
-[![StaticBadge](https://img.shields.io/badge/version-v0.2.0-purple)](https://github.com/dumbdemon/P3-Timer-JDA/releases/tag/0.2.0)
+[![StaticBadge](https://img.shields.io/badge/version-v0.2.0-purple)](https://github.com/dumbdemon/P3-Timer-JDA/releases/tag/0.3.1)
 
 # P3-Timer-JDA
 
