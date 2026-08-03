@@ -14,7 +14,7 @@ First you'll need a Discord token. Then decide how you'll run the bot.
 ### Obtain a Discord Bot Token
 
 1. Head to the [Discord Developer Panel](https://discord.com/developers/applications) and create a new application.
-2. Go to the `Bot` panel on the right.
+2. Go to the `Bot` panel on the left.
 3. Under `Token`, click `Reset Token` button.
 4. Confirm by clicking `Yes, do it!` Authenticate if necessary.
 5. Click `Copy` to copy the token. ***DO NOT SHARE THIS TOKEN WITH ANYONE. NEITHER I NOR A DISCORD EMPLOYEE WILL
